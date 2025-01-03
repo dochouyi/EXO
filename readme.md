@@ -5,3 +5,22 @@
 
 
 我正在研发一个行走助力外骨骼，由两个电机组成，分别安装在大腿外侧。这个代码中没有两个电机的协同，包括周期等，有哪些改进建议
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+git remote rename origin old-origin
+git remote add origin ssh://git@gitlab.uatair.com:2224/zhzsz/gzcl/algorithm/algorithmTeam/houyi/dnn_stereo_matching_package.git
+
+git push --set-upstream origin --all
+git push --set-upstream origin --tags
