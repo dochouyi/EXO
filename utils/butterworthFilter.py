@@ -2,7 +2,6 @@ from scipy.signal import butter, filtfilt
 from collections import deque
 
 
-
 class ButterworthFilter:
     """
     2阶巴特沃斯滤波器类

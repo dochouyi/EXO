@@ -1,9 +1,8 @@
 import time
-from utils.realTimePlotter import RealTimePlotter
+from utils.realTimePlotter import RealTimePlotterMul4
 from motor.filteredmotorController import FilteredMotorController
 import numpy as np
 from trajectory_handler.sineGenerator import SineTrajectoryHandler
-
 
 
 class ImpedanceController:
@@ -26,7 +25,7 @@ class ImpedanceController:
         self.integral_limit = 1.0
         self.integral_error = 0.0  #积分项初始化
         self.error_log = []
-        self.plotter = RealTimePlotter()
+        self.plotter = RealTimePlotterMul4()
 
     def run(self):
         start_time = time.time()
@@ -68,17 +67,13 @@ class ImpedanceController:
             adjusted_torque = target_torque + self.Kf * external_torque
             adjusted_torque = max(min(adjusted_torque, self.MAX_TORQUE), -self.MAX_TORQUE)
 
-            # 力矩补偿与限制
-            # external_torque = self.motor.estimate_external_torque(target_torque)
-            # adjusted_torque = target_torque + 0.1
-            # adjusted_torque = max(min(adjusted_torque, self.MAX_TORQUE), -self.MAX_TORQUE)
 
             self.motor_controller.set_input_torque(adjusted_torque)
 
             # 记录误差
             self.error_log.append(position_error)
             # 控制循环频率
-            self.plotter.update(t, current_position, current_velocity, target_torque, adjusted_torque)
+            self.plotter.update_data(t, current_position, current_velocity, target_torque, adjusted_torque)
             # 控制循环频率
             time.sleep(0.001)
 

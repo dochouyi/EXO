@@ -2,7 +2,7 @@ import time
 import numpy as np
 from collections import defaultdict
 from motor.motorController import FilteredMotorController
-from utils.realTimePlotter import RealTimePlotter
+from utils.realTimePlotterBase import RealTimePlotter
 from trajectory_handler.sineGenerator import TrajectoryGenerator
 
 class QLearningControllerWithTrajectory:

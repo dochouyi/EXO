@@ -1,5 +1,5 @@
 import time
-from utils.realTimePlotter import RealTimePlotter
+from utils.realTimePlotter import RealTimePlotterMul4X2
 from motor.doubleMotorController import FilteredDoubleMotorController
 import numpy as np
 from trajectory_handler.sineGenerator import SineTrajectoryHandler
@@ -35,7 +35,7 @@ class DualLegImpedanceController:
         self.integral_error_right = 0.0
         self.error_log_left = []
         self.error_log_right = []
-        self.plotter = RealTimePlotter()
+        self.plotter = RealTimePlotterMul4X2()
 
         # 设置速度等级
         self.speed_level = speed_level
