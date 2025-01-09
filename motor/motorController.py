@@ -1,7 +1,7 @@
 import odrive
 from odrive.enums import *
 from typing import Optional
-from utils.butterworthFilter import ButterworthFilter
+
 
 class MotorController:
     """
@@ -34,6 +34,133 @@ class MotorController:
             print(f"初始化 ODrive 失败: {e}")
             exit()
 
+    def display_values(self) -> None:
+        print("Motor Configuration:")
+        print(f"  Pole Pairs: {self.odrv0.axis0.motor.config.pole_pairs}")
+        print(f"  Torque Constant: {self.odrv0.axis0.motor.config.torque_constant}")
+        print(f"  Calibration Current: {self.odrv0.axis0.motor.config.calibration_current}")
+        print(f"  Resistance Calibration Max Voltage: {self.odrv0.axis0.motor.config.resistance_calib_max_voltage}")
+        print(f"  Current Limit: {self.odrv0.axis0.motor.config.current_lim}")
+
+        print("\nController Configuration:")
+        print(f"  Enable Velocity Limit: {self.odrv0.axis0.controller.config.enable_vel_limit}")
+        print(f"  Enable Torque Mode Velocity Limit: {self.odrv0.axis0.controller.config.enable_torque_mode_vel_limit}")
+        print(f"  Input Filter Bandwidth: {self.odrv0.axis0.controller.config.input_filter_bandwidth}")
+        print(f"  Velocity Limit: {self.odrv0.axis0.controller.config.vel_limit}")
+
+        print("\nMotor Thermistor Configuration:")
+        print(f"  Enabled: {self.odrv0.axis0.motor.motor_thermistor.config.enabled}")
+        print(f"  Temp Limit Lower: {self.odrv0.axis0.motor.motor_thermistor.config.temp_limit_lower}")
+        print(f"  Temp Limit Upper: {self.odrv0.axis0.motor.motor_thermistor.config.temp_limit_upper}")
+
+        print("\nFET Thermistor Configuration:")
+        print(f"  Enabled: {self.odrv0.axis0.motor.fet_thermistor.config.enabled}")
+        print(f"  Temp Limit Lower: {self.odrv0.axis0.motor.fet_thermistor.config.temp_limit_lower}")
+        print(f"  Temp Limit Upper: {self.odrv0.axis0.motor.fet_thermistor.config.temp_limit_upper}")
+
+        print("\nDC Bus Configuration:")
+        print(f"  Overvoltage Trip Level: {self.odrv0.config.dc_bus_overvoltage_trip_level}")
+        print(f"  Undervoltage Trip Level: {self.odrv0.config.dc_bus_undervoltage_trip_level}")
+        print(f"  Max Positive Current: {self.odrv0.config.dc_max_positive_current}")
+        print(f"  Max Negative Current: {self.odrv0.config.dc_max_negative_current}")
+        print(f"  Enable Brake Resistor: {self.odrv0.config.enable_brake_resistor}")
+        print(f"  Enable DC Bus Overvoltage Ramp: {self.odrv0.config.enable_dc_bus_overvoltage_ramp}")
+        print(f"  DC Bus Overvoltage Ramp Start: {self.odrv0.config.dc_bus_overvoltage_ramp_start}")
+        print(f"  DC Bus Overvoltage Ramp End: {self.odrv0.config.dc_bus_overvoltage_ramp_end}")
+        print(f"  Brake Resistance: {self.odrv0.config.brake_resistance}")
+        print(f"  Max Regen Current: {self.odrv0.config.max_regen_current}")
+
+        print("\nCAN Configuration:")
+        print(f"  Node ID: {self.odrv0.axis0.config.can.node_id}")
+        print(f"  Baud Rate: {self.odrv0.can.config.baud_rate}")
+        print(f"  R120 GPIO Num: {self.odrv0.can.config.r120_gpio_num}")
+        print(f"  Enable R120: {self.odrv0.can.config.enable_r120}")
+
+        print("\nConfiguration saved successfully.")
+
+
+    def set_values_switch_power(self) -> None:
+        # 完全确定的参数
+        self.odrv0.axis0.motor.config.pole_pairs = 10
+        self.odrv0.axis0.motor.config.torque_constant = 0.042
+        self.odrv0.axis0.motor.config.calibration_current = 5
+        self.odrv0.axis0.motor.config.resistance_calib_max_voltage = 5
+        self.odrv0.axis0.controller.config.enable_vel_limit = True
+        self.odrv0.axis0.controller.config.enable_torque_mode_vel_limit = 1
+        self.odrv0.axis0.controller.config.input_filter_bandwidth = 0
+
+        # 温度相关的一系列参数
+        self.odrv0.axis0.motor.motor_thermistor.config.enabled = 1
+        self.odrv0.axis0.motor.motor_thermistor.config.temp_limit_lower = -20
+        self.odrv0.axis0.motor.motor_thermistor.config.temp_limit_upper = 90
+        self.odrv0.axis0.motor.fet_thermistor.config.enabled = 1
+        self.odrv0.axis0.motor.fet_thermistor.config.temp_limit_lower = -20
+        self.odrv0.axis0.motor.fet_thermistor.config.temp_limit_upper = 90
+
+        self.odrv0.config.dc_bus_overvoltage_trip_level = 30.0
+        self.odrv0.config.dc_bus_undervoltage_trip_level = 18
+        self.odrv0.config.dc_max_positive_current = 25
+        self.odrv0.config.dc_max_negative_current = 0
+        self.odrv0.config.enable_brake_resistor = True
+        self.odrv0.config.enable_dc_bus_overvoltage_ramp = True
+        self.odrv0.config.dc_bus_overvoltage_ramp_start = 28
+        self.odrv0.config.dc_bus_overvoltage_ramp_end = 29
+
+        self.odrv0.config.brake_resistance = 1
+        self.odrv0.config.max_regen_current = 0 #再生电流设置为10A，防止刹车时的能量回流超过电源或刹车电阻的承受能力
+
+        self.odrv0.axis0.motor.config.current_lim = 30
+        self.odrv0.axis0.controller.config.vel_limit = 5000
+
+        self.odrv0.axis0.config.can.node_id = 1
+        self.odrv0.can.config.baud_rate = 500000
+        self.odrv0.can.config.r120_gpio_num = 5
+        self.odrv0.can.config.enable_r120 = True
+
+        self.odrv0.save_configuration()
+
+    def set_values_battery(self) -> None:
+        # 完全确定的参数
+        self.odrv0.axis0.motor.config.pole_pairs = 10
+        self.odrv0.axis0.motor.config.torque_constant = 0.042
+        self.odrv0.axis0.motor.config.calibration_current = 5
+        self.odrv0.axis0.motor.config.resistance_calib_max_voltage = 5
+        self.odrv0.axis0.controller.config.enable_vel_limit = True
+        self.odrv0.axis0.controller.config.enable_torque_mode_vel_limit = 1
+        self.odrv0.axis0.controller.config.input_filter_bandwidth = 0
+
+        # 温度相关的一系列参数
+        self.odrv0.axis0.motor.motor_thermistor.config.enabled = 1
+        self.odrv0.axis0.motor.motor_thermistor.config.temp_limit_lower = -20
+        self.odrv0.axis0.motor.motor_thermistor.config.temp_limit_upper = 90
+        self.odrv0.axis0.motor.fet_thermistor.config.enabled = 1
+        self.odrv0.axis0.motor.fet_thermistor.config.temp_limit_lower = -20
+        self.odrv0.axis0.motor.fet_thermistor.config.temp_limit_upper = 90
+
+        #以下参数需要配置
+        self.odrv0.config.dc_bus_overvoltage_trip_level = 30.0
+        self.odrv0.config.dc_bus_undervoltage_trip_level = 18
+        self.odrv0.config.dc_max_positive_current = 25
+        self.odrv0.config.dc_max_negative_current = -10
+        self.odrv0.config.enable_brake_resistor = True
+        self.odrv0.config.enable_dc_bus_overvoltage_ramp = True
+        self.odrv0.config.dc_bus_overvoltage_ramp_start = 28
+        self.odrv0.config.dc_bus_overvoltage_ramp_end = 29
+
+        self.odrv0.config.brake_resistance = 1
+        self.odrv0.config.max_regen_current = 10
+
+        self.odrv0.axis0.motor.config.current_lim = 30
+        self.odrv0.axis0.controller.config.vel_limit = 5000
+
+        self.odrv0.axis0.config.can.node_id = 1
+        self.odrv0.can.config.baud_rate = 500000
+        self.odrv0.can.config.r120_gpio_num = 5
+        self.odrv0.can.config.enable_r120 = True
+
+        self.odrv0.save_configuration()
+
+
     def calibrate_motor(self) -> None:
         """
         校准电机，包括电机和编码器的校准。
@@ -42,6 +169,9 @@ class MotorController:
             print("开始校准...")
             self._set_axis_state(AXIS_STATE_MOTOR_CALIBRATION)
             self._set_axis_state(AXIS_STATE_ENCODER_OFFSET_CALIBRATION)
+
+            self.odrv0.axis0.motor.config.pre_calibrated = 1
+            self.odrv0.axis0.encoder.config.pre_calibrated = 1
             self.odrv0.save_configuration()
             print("校准完成。")
         except Exception as e:
@@ -55,7 +185,6 @@ class MotorController:
         try:
             self.odrv0.axis0.controller.config.control_mode = CONTROL_MODE_TORQUE_CONTROL
             self._set_axis_state(AXIS_STATE_CLOSED_LOOP_CONTROL)
-            print("已设置为力矩控制模式。")
         except Exception as e:
             print(f"设置力矩控制模式失败: {e}")
 
@@ -66,7 +195,6 @@ class MotorController:
         try:
             self.odrv0.axis0.controller.input_torque = 0
             self._set_axis_state(AXIS_STATE_IDLE)
-            print("电机已停止。")
         except Exception as e:
             print(f"停止电机失败: {e}")
 
@@ -99,7 +227,7 @@ class MotorController:
         获取力矩估算值。
         :return: 力矩估算值。
         """
-        return self.odrv0.axis0.motor.torque_estimate
+        return self.get_Iq_measured()*self.get_torque_constant()
 
     def get_vel_estimate(self) -> float:
         """
@@ -121,65 +249,15 @@ class MotorController:
         :param state: 目标状态。
         """
         self.odrv0.axis0.requested_state = state
-        while self.odrv0.axis0.current_state != AXIS_STATE_IDLE:
+        while self.odrv0.axis0.current_state != state:
             pass
 
-
-class FilteredMotorController(MotorController):
-    def __init__(self, odrv_serial: Optional[str] = None,
-                 order: int = 2, cutoff_freq: float = 10, sampling_freq: float = 1000):
+    def reset_origin(self, new_angle) -> None:
         """
-        初始化双电机控制器以及滤波器。
-        :param odrv_serial: 第一个 ODrive 的序列号。
-        :param order: 滤波器阶数。
-        :param cutoff_freq: 滤波器的截止频率。
-        :param sampling_freq: 滤波器的采样频率。
+        重置电机的原点位置。
+        用户输入新的角度值，并将其设置为当前位置估算值。
         """
-        # 调用父类的初始化方法
-        super().__init__(odrv_serial)
-        # 初始化第一个电机的滤波器
-        self.position_filter = ButterworthFilter(order=order, cutoff_freq=cutoff_freq, sampling_freq=sampling_freq)
-        self.velocity_filter = ButterworthFilter(order=order, cutoff_freq=cutoff_freq, sampling_freq=sampling_freq)
-        self.current_filter = ButterworthFilter(order=order, cutoff_freq=cutoff_freq, sampling_freq=sampling_freq)
-        self.torque_filter = ButterworthFilter(order=order, cutoff_freq=cutoff_freq, sampling_freq=sampling_freq)
-
-    def get_Iq_measured_filtered(self):
-        """
-        获取滤波后的测量电流 Iq。
-        :return: Iq 测量值。
-        """
-        value=self.current_filter.filter_signal(self.get_Iq_measured())
-        return value
-
-    def get_torque_estimate_filtered(self):
-        """
-        获取滤波后的力矩估算值。
-        :return: 力矩估算值。
-        """
-        value=self.torque_filter.filter_signal(self.get_torque_estimate())
-        return value
-
-    def get_vel_estimate_filtered(self):
-        """
-        获取滤波后的速度估算值。
-        :return: 速度估算值。
-        """
-        value=self.velocity_filter.filter_signal(self.get_vel_estimate())
-        return value
-
-    def get_pos_estimate_filtered(self):
-        """
-        获取滤波后的位置估算值。
-        :return: 位置估算值。
-        """
-        value=self.position_filter.filter_signal(self.get_pos_estimate())
-
-        return value
-
-    def estimate_external_torque(self, input_torque):
-        """
-        估计外部力矩
-        :param input_torque: 输入力矩
-        :return: 外部力矩
-        """
-        return self.get_torque_estimate_filtered() - input_torque
+        try:
+            self.odrv0.axis0.encoder.index_offset= new_angle
+        except Exception as e:
+            print(f"重置原点失败: {e}")

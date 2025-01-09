@@ -2,6 +2,7 @@ from scipy.signal import butter, filtfilt
 from collections import deque
 
 
+
 class ButterworthFilter:
     """
     2阶巴特沃斯滤波器类
@@ -17,6 +18,7 @@ class ButterworthFilter:
         """
         self.b, self.a = butter(order, cutoff_freq / (0.5 * sampling_freq), btype='low')
         self.signal_list = deque(maxlen=self.HISTORY_LIMIT)  # 使用 deque 代替列表
+        self.order = order  # 保存滤波器阶数
 
     def apply(self, data):
         """
@@ -33,5 +35,7 @@ class ButterworthFilter:
         :return: 滤波后的信号值
         """
         self.signal_list.append(new_value)
+        if len(self.signal_list) < self.order + 1:
+            return new_value
         # 返回滤波后的值
         return self.apply(list(self.signal_list))[-1]

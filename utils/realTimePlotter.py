@@ -4,6 +4,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use('TkAgg')  # 设置后端为 TkAgg
 
+
+
 class RealTimePlotter:
     def __init__(self, window_size=40, update_interval=10):  # 增加 update_interval 参数
         self.time_data = []
@@ -40,10 +42,10 @@ class RealTimePlotter:
             ax.legend(fontsize=10)
             ax.set_xlim(0, 50)  # 初始化时，横坐标范围固定为 [0, 40]
 
-        self.axs[0].set_ylim(-1.5, 1.5)  # 位置的默认纵坐标范围
-        self.axs[1].set_ylim(-1.5, 1.5)  # 速度的默认纵坐标范围
-        self.axs[2].set_ylim(-0.6, 0.6)  # 转矩的默认纵坐标范围
-        self.axs[3].set_ylim(-0.4, 0.4)  # 外部转矩的默认纵坐标范围
+        self.axs[0].set_ylim(-10, 10)  # 位置的默认纵坐标范围
+        self.axs[1].set_ylim(-50, 50)  # 速度的默认纵坐标范围
+        self.axs[2].set_ylim(-20, 20)  # 转矩的默认纵坐标范围
+        self.axs[3].set_ylim(-15, 15)  # 外部转矩的默认纵坐标范围
 
     def update(self, time, position, velocity, torque, external_torque):
         self.time_data.append(time)
@@ -81,6 +83,9 @@ class RealTimePlotter:
     def finalize(self):
         plt.ioff()
         plt.show()
+
+
+
 
 def test_real_time_plotter():
     plotter = RealTimePlotter(window_size=40, update_interval=10)  # 设置横坐标窗口大小为 40 秒，绘图频率为每 10 步更新一次

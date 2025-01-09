@@ -11,7 +11,7 @@ class SineTrajectoryHandler:
     该类支持生成正弦轨迹的位移、速度和加速度，同时可以通过输入的时间和位移数据拟合正弦轨迹参数（振幅、频率和相位）。
     """
 
-    def __init__(self, amplitude=1.0, frequency=1.0, phase=0.0, window_size=50):
+    def __init__(self, amplitude=1.0, frequency=1.0, phase=0.0, window_size=5):
         """
         初始化正弦轨迹生成器和估计器。
 
@@ -80,16 +80,17 @@ class SineTrajectoryHandler:
         position_data = np.array(self.position_data)
 
         # 初始参数估计
-        initial_amplitude = (np.max(position_data) - np.min(position_data)) / 2
-        time_span = time_data[-1] - time_data[0]
-        initial_frequency = 1.0 / time_span if time_span > 0 else 1.0
-        initial_phase = 0.0
-        initial_guess = [initial_amplitude, initial_frequency, initial_phase]
+        initial_guess = [1, 0.1, 0]
 
         # 使用 curve_fit 进行拟合
         params = curve_fit(sinusoidal_model, time_data, position_data, p0=initial_guess)
         try:
             self.amplitude, self.frequency, self.phase = params[0]
+
+            # self.amplitude = min(self.amplitude, 2)
+            # self.frequency = min(self.frequency, 0.5)
+            # print("frequency:", self.frequency)
+
         except ValueError as e:
             print(f"轨迹拟合失败: {e}")
 
