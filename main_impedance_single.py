@@ -1,3 +1,4 @@
+import math
 import time
 from utils.realTimePlotter import RealTimePlotterMul4
 from motor.filteredmotorController import FilteredMotorController
@@ -27,6 +28,39 @@ class ImpedanceController:
         self.error_log = []
         self.plotter = RealTimePlotterMul4()
 
+
+    def control_motor_forward(self, max_rotation=180, resistance_threshold=1.0):
+        """
+        控制电机正向缓慢运动，当外界阻力大于 1 Nm 时停止并返回 True；
+        如果旋转 180 度仍未达到力矩阈值，则返回 False。
+
+        :param max_rotation: 最大旋转角度（度）
+        :param resistance_threshold: 阻力阈值 (Nm)
+        :return: bool
+        """
+        self.motor_controller.set_input_torque(0.1)  # 设置初始缓慢运动力矩
+        start_position = self.motor_controller.get_pos_estimate_filtered()  # 记录初始位置
+
+        while True:
+            current_position = self.motor_controller.get_pos_estimate_filtered()
+            external_torque = self.motor_controller.estimate_external_torque(0.1)
+
+            # 检查力矩是否超过阈值
+            if external_torque > resistance_threshold:
+                self.motor_controller.set_input_torque(0.0)  # 停止电机
+                print("外界阻力超过阈值，停止电机。")
+                return True
+
+            # 检查是否旋转超过最大角度
+            rotation_angle = abs(current_position - start_position) * 180 / math.pi  # 转换为角度
+            if rotation_angle >= max_rotation:
+                self.motor_controller.set_input_torque(0.0)  # 停止电机
+                print("旋转角度达到最大值，未检测到足够的外界阻力。")
+                return False
+
+            time.sleep(0.01)  # 控制循环频率
+
+
     def run(self):
         start_time = time.time()
         last_time = start_time
@@ -42,8 +76,8 @@ class ImpedanceController:
 
             # 更新轨迹
             self.trajectory_handler.update_data(t, current_position)
-            # if t % 0.01 < dt:  # 每隔 10ms 更新一次轨迹参数
-            #     self.trajectory_handler.fit_and_update()
+            if t % 0.01 < dt:  # 每隔 10ms 更新一次轨迹参数
+                self.trajectory_handler.fit_and_update()
 
             desired_position = self.trajectory_handler.get_position(t)
             desired_velocity = self.trajectory_handler.get_velocity(t)
@@ -82,6 +116,7 @@ class ImpedanceController:
         self.analyze_performance()
         self.motor_controller.stop_motor()
 
+
     def analyze_performance(self):
         rms_error = np.sqrt(np.mean(np.square(self.error_log)))
         max_error = np.max(np.abs(self.error_log))
@@ -97,5 +132,5 @@ if __name__ == "__main__":
 
     trajectory_handler = SineTrajectoryHandler(amplitude=0.5, frequency=0.5)
 
-    controller = ImpedanceController(motor, trajectory_handler, duration=10)
+    controller = ImpedanceController(motor, trajectory_handler, duration=1000)
     controller.run()

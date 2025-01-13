@@ -5,6 +5,7 @@ from motor.motorController import FilteredMotorController
 from utils.realTimePlotterBase import RealTimePlotter
 from trajectory_handler.sineGenerator import TrajectoryGenerator
 
+
 class QLearningControllerWithTrajectory:
     """
     结合预期轨迹的Q学习控制器

@@ -1,0 +1,3 @@
+
+pip install PyQtChart
+pip install odrive

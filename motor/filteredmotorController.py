@@ -1,6 +1,6 @@
 from typing import Optional
 from utils.butterworthFilter import ButterworthFilter
-from motorController import MotorController
+from motor.motorController import MotorController
 
 
 class FilteredMotorController(MotorController):

@@ -1,3 +1,4 @@
+import math
 import time
 from utils.realTimePlotter import RealTimePlotterMul4X2
 from motor.doubleMotorController import FilteredDoubleMotorController
@@ -5,11 +6,12 @@ import numpy as np
 from trajectory_handler.sineGenerator import SineTrajectoryHandler
 
 
+
 class DualLegImpedanceController:
     """
     左右腿独立阻抗控制类，支持通过速度等级控制行走速度。
     """
-    MAX_TORQUE = 2.0  # 最大力矩限制
+    MAX_TORQUE = 6.0  # 最大力矩限制
 
     def __init__(self, motor_controller, trajectory_handler_left, trajectory_handler_right, duration,
                  speed_level=5,  # 默认速度等级为5
@@ -40,6 +42,42 @@ class DualLegImpedanceController:
         # 设置速度等级
         self.speed_level = speed_level
         self._apply_speed_level()
+
+
+
+    def control_motor_forward(self, max_rotation=180, resistance_threshold=1.0):
+        """
+        控制电机正向缓慢运动，当外界阻力大于 1 Nm 时停止并返回 True；
+        如果旋转 180 度仍未达到力矩阈值，则返回 False。
+
+        :param max_rotation: 最大旋转角度（度）
+        :param resistance_threshold: 阻力阈值 (Nm)
+        :return: bool
+        """
+        self.motor_controller.set_input_torque(0.1,-0.1)  # 设置初始缓慢运动力矩
+        start_position_left, start_position_right= self.motor_controller.get_pos_estimate_filtered()  # 记录初始位置
+
+        while True:
+            current_position_left, current_position_right = self.motor_controller.get_pos_estimate_filtered()
+            external_torque_left = self.motor_controller.motor1.estimate_external_torque(0.1)
+            external_torque_right = self.motor_controller.motor2.estimate_external_torque(0.1)
+
+            # 检查力矩是否超过阈值
+            if external_torque_left > resistance_threshold and external_torque_right > resistance_threshold:
+                self.motor_controller.set_input_torque(0,0)
+                print("外界阻力超过阈值，停止电机。")
+                return True
+
+            # 检查是否旋转超过最大角度
+            rotation_angle = abs(current_position_left - start_position_left) * 180 / math.pi  # 转换为角度
+            if rotation_angle >= max_rotation:
+                self.motor_controller.set_input_torque(0,0)
+                print("旋转角度达到最大值，未检测到足够的外界阻力。")
+                return False
+
+            time.sleep(0.01)  # 控制循环频率
+
+
 
     def _apply_speed_level(self):
         """
@@ -281,11 +319,13 @@ class DualLegImpedanceController:
         self.analyze_performance()
 
 
+
     def analyze_performance(self):
         rms_error_left = np.sqrt(np.mean(np.square(self.error_log_left)))
         rms_error_right = np.sqrt(np.mean(np.square(self.error_log_right)))
         print(f"左腿 - RMS 误差: {rms_error_left:.4f}")
         print(f"右腿 - RMS 误差: {rms_error_right:.4f}")
+
 
 
 # 主程序
