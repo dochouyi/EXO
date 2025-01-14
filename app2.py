@@ -12,6 +12,7 @@ from motor.filteredmotorController import FilteredMotorController
 from trajectory_handler.sineGenerator import SineTrajectoryHandler
 from main_impedance_single import ImpedanceController  # 假设该类在 impedance_controller.py 中
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()

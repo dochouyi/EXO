@@ -27,7 +27,7 @@ class DataCollectorSingle:
 
     def run(self):
         """
-        主运行函数，用于实时采集数据并存储。
+        主运行函数，用于实时采集数据并存储。记录的数据是没有经过滤波的原始数据
         """
         start_time = time.time()
 

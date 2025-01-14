@@ -1,5 +1,5 @@
 from utils.butterworthFilter import ButterworthFilter
-from motorController import MotorController
+from motor.motorController import MotorController
 
 
 class DoubleMotorController:
@@ -88,6 +88,26 @@ class DoubleMotorController:
         """
         return [self.motor1.get_pos_estimate(), self.motor2.get_pos_estimate()]
 
+    def get_fake_torque_estimate(self):
+        """
+        获取力矩估算值。
+        :return: 力矩估算值。
+        """
+        return [1,1]
+
+    def get_fake_vel_estimate(self):
+        """
+        获取速度估算值。
+        :return: 速度估算值。
+        """
+        return [1,1]
+
+    def get_fake_pos_estimate(self):
+        """
+        获取位置估算值。
+        :return: 位置估算值。
+        """
+        return [1,1]
 
 class FilteredDoubleMotorController(DoubleMotorController):
     """
